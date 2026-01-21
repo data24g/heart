@@ -11,6 +11,90 @@ body {
     overflow: hidden;
 }
 
+/* Counter Container */
+.counter-container {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 100;
+    text-align: right;
+}
+
+.counter-label {
+    font-size: 18px;
+    color: #ff1744;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.counter-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+
+.counter-value span {
+    color: #ff1744;
+}
+
+/* Start Button */
+.start-button {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    font-size: 24px;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #ff1744, #d50000);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.start-button:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 6px 25px rgba(255, 23, 68, 0.6);
+}
+
+.start-button:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.start-button.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.5);
+    transition: all 0.5s ease;
+}
+
+.start-button.completed {
+    animation: celebrate 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 30px rgba(255, 23, 68, 0.8);
+    }
+}
+
+@keyframes celebrate {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.3); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
 /* Canvas for 3D Heart */
 #heartCanvas {
     position: fixed;
@@ -20,4 +104,3 @@ body {
     height: 100%;
     z-index: 0;
 }
-

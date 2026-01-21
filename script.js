@@ -2,12 +2,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('heartCanvas');
     const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const counterEl = document.getElementById('counter');
     
     let width, height;
     let particles = [];
     let scale = 0.5;
     let animationProgress = 0;
     let animationComplete = false;
+    let isAnimating = false;
+    let clickCount = 0;
+    const targetClicks = 100;
     
     // Resize canvas
     function resize() {
@@ -15,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
         height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
-        generateHeart();
     }
     
     // Generate heart shape points using parametric equations
@@ -105,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
         ctx.fillRect(0, 0, width, height);
         
-        // Update animation progress
-        if (!animationComplete) {
+        // Only update animation if button was clicked
+        if (isAnimating && !animationComplete) {
             animationProgress += 0.008;
             if (animationProgress >= 1) {
                 animationProgress = 1;
@@ -121,7 +125,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Interpolate from start position to target position
             let currentX, currentY, currentZ;
             
-            if (animationComplete) {
+            if (!isAnimating) {
+                // Stay at start position
+                currentX = particle.startX;
+                currentY = particle.startY;
+                currentZ = particle.startZ;
+            } else if (animationComplete) {
                 currentX = particle.originalX * scale;
                 currentY = particle.originalY * scale;
                 currentZ = particle.originalZ * scale;
@@ -186,6 +195,43 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(draw);
     }
     
+    // Start button click handler
+    startBtn.addEventListener('click', function() {
+        // First click: increment by 1
+        clickCount++;
+        counterEl.textContent = clickCount;
+        
+        // Start auto-increment after 3 second delay
+        if (clickCount === 1) {
+            setTimeout(() => {
+                const autoIncrement = setInterval(() => {
+                    clickCount++;
+                    counterEl.textContent = clickCount;
+                    
+                    if (clickCount >= targetClicks) {
+                        clearInterval(autoIncrement);
+                        
+                        // Celebrate animation
+                        startBtn.classList.add('completed');
+                        startBtn.textContent = '❤️ Yêu Thương ❤️';
+                        
+                        // Hide button with animation after celebration
+                        setTimeout(() => {
+                            startBtn.classList.add('hidden');
+                        }, 500);
+                        
+                        // Start heart animation
+                        setTimeout(() => {
+                            isAnimating = true;
+                            animationProgress = 0;
+                            animationComplete = false;
+                        }, 1000);
+                    }
+                }, 50); // Fast auto-increment (50ms per count)
+            }, 3000); // 3 second delay before auto-increment starts
+        }
+    });
+    
     // Scroll to zoom
     canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
@@ -198,5 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize
     resize();
+    generateHeart();
     draw();
 });
