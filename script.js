@@ -1,4 +1,4 @@
-// 3D Heart Particles JavaScript
+// 3D Heart Particles JavaScript - Mobile Optimized
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('heartCanvas');
     const ctx = canvas.getContext('2d');
@@ -14,20 +14,48 @@ document.addEventListener('DOMContentLoaded', function() {
     let clickCount = 0;
     const targetClicks = 100;
     
+    // Check if mobile device
+    const isMobile = () => window.innerWidth <= 480 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Get responsive scale based on screen size
+    const getResponsiveScale = () => {
+        const baseScale = 0.5;
+        if (width <= 360) return baseScale * 0.7;
+        if (width <= 480) return baseScale * 0.8;
+        if (width <= 768) return baseScale * 0.9;
+        return baseScale;
+    };
+    
+    // Get particle count based on device
+    const getParticleCount = () => {
+        if (isMobile()) {
+            return { outer: 1500, inner: 500 }; // Fewer particles on mobile
+        }
+        return { outer: 3500, inner: 1200 };
+    };
+    
     // Resize canvas
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
+        
+        // Update scale for responsive
+        scale = getResponsiveScale();
+        
+        // Regenerate particles with new dimensions
+        generateHeart();
     }
     
     // Generate heart shape points using parametric equations
     function generateHeart() {
         particles = [];
+        const counts = getParticleCount();
+        const multiplier = isMobile() ? 25 : 40; // Smaller multiplier on mobile
         
         // Main heart particles - evenly distributed (outer layer)
-        const outerParticles = 3500;
+        const outerParticles = counts.outer;
         for (let i = 0; i < outerParticles; i++) {
             const t = (i / outerParticles) * Math.PI * 2;
             const x = 16 * Math.pow(Math.sin(t), 3);
@@ -46,11 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const startZ = (Math.random() - 0.5) * 200;
             
             particles.push({
-                x: x * 40 + offsetX,
-                y: y * 40 + offsetY,
+                x: x * multiplier + offsetX,
+                y: y * multiplier + offsetY,
                 z: z,
-                originalX: x * 40,
-                originalY: y * 40,
+                originalX: x * multiplier,
+                originalY: y * multiplier,
                 originalZ: z,
                 startX: startX,
                 startY: startY,
@@ -63,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Inner glow particles - evenly distributed for 3D depth effect
-        const innerParticles = 1200;
+        const innerParticles = counts.inner;
         for (let i = 0; i < innerParticles; i++) {
             const t = (i / innerParticles) * Math.PI * 2;
             const x = 16 * Math.pow(Math.sin(t), 3);
@@ -82,11 +110,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const startZ = (Math.random() - 0.5) * 200;
             
             particles.push({
-                x: x * 40 * layerScale,
-                y: y * 40 * layerScale,
+                x: x * multiplier * layerScale,
+                y: y * multiplier * layerScale,
                 z: z,
-                originalX: x * 40 * layerScale,
-                originalY: y * 40 * layerScale,
+                originalX: x * multiplier * layerScale,
+                originalY: y * multiplier * layerScale,
                 originalZ: z,
                 startX: startX,
                 startY: startY,
@@ -195,8 +223,10 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(draw);
     }
     
-    // Start button click handler
-    startBtn.addEventListener('click', function() {
+    // Start button click handler - support both click and touch
+    function handleButtonClick(e) {
+        e.preventDefault();
+        
         // First click: increment by 1
         clickCount++;
         counterEl.textContent = clickCount;
@@ -230,20 +260,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 50); // Fast auto-increment (50ms per count)
             }, 3000); // 3 second delay before auto-increment starts
         }
-    });
+    }
     
-    // Scroll to zoom
+    startBtn.addEventListener('click', handleButtonClick);
+    startBtn.addEventListener('touchstart', handleButtonClick, { passive: false });
+    
+    // Scroll to zoom - disabled on mobile
     canvas.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        scale += e.deltaY * -0.001;
-        scale = Math.max(0.5, Math.min(3, scale));
-    });
+        if (!isMobile()) {
+            e.preventDefault();
+            scale += e.deltaY * -0.001;
+            scale = Math.max(0.3, Math.min(3, scale));
+        }
+    }, { passive: false });
+    
+    // Prevent pull-to-refresh on mobile
+    document.body.addEventListener('touchmove', (e) => {
+        if (e.target === document.body || e.target === canvas) {
+            e.preventDefault();
+        }
+    }, { passive: false });
     
     // Window resize
     window.addEventListener('resize', resize);
     
+    // Handle orientation change
+    window.addEventListener('orientationchange', () => {
+        setTimeout(resize, 100);
+    });
+    
     // Initialize
     resize();
-    generateHeart();
     draw();
 });
+
